@@ -1,0 +1,3 @@
+include README.md
+include LICENSE.md
+recursive-include octoprint_prusa_connect_uploader/templates *

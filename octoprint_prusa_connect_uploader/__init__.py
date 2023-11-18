@@ -8,7 +8,7 @@ import hashlib
 import uuid
 
 
-class PrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
+class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
                                  octoprint.plugin.SettingsPlugin,
                                  octoprint.plugin.TemplatePlugin):
 
@@ -113,4 +113,4 @@ __plugin_pythoncompat__ = ">=3,<4"
 
 def __plugin_load__():
     global __plugin_implementation__
-    __plugin_implementation__ = PrusaConnectUploaderPlugin()
+    __plugin_implementation__ = OctoprintPrusaConnectUploaderPlugin()
