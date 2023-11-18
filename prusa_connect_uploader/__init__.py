@@ -8,7 +8,7 @@ import hashlib
 import uuid
 
 
-class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
+class PrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
                                  octoprint.plugin.SettingsPlugin,
                                  octoprint.plugin.TemplatePlugin):
 
@@ -88,7 +88,7 @@ class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
 
     def get_template_configs(self):
         return [
-            dict(type="settings", custom_bindings=False, template="octoprint_prusa_connect_uploader_settings.jinja2")
+            dict(type="settings", custom_bindings=False, template="prusa_connect_uploader_settings.jinja2")
         ]
 
 
@@ -108,9 +108,9 @@ class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
         if self.timer:
             self.timer.cancel()
 
-__plugin_name__ = "Octoprint Prusa Connect Uploader"
+__plugin_name__ = "Prusa Connect Uploader"
 __plugin_pythoncompat__ = ">=3,<4"
 
 def __plugin_load__():
     global __plugin_implementation__
-    __plugin_implementation__ = OctoprintPrusaConnectUploaderPlugin()
+    __plugin_implementation__ = PrusaConnectUploaderPlugin()
