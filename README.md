@@ -5,7 +5,7 @@ This OctoPrint plugin allows users to automatically upload snapshots from their 
 ## Installation
 
 1. In OctoPrint, navigate to **Settings** > **Plugin Manager** > **Get More**.
-2. Enter the following URL for the plugin archive: <https://github.com/rizz360/prusa_connect_uploader/archive/refs/tags/1.0.zip>
+2. Enter the following URL for the plugin archive: <https://github.com/rizz360/prusa_connect_uploader/archive/refs/tags/1.0.2.zip>
 3. Click "Install" to add the plugin to your OctoPrint instance.
 
 ## Configuration
