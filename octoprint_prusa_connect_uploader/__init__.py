@@ -7,10 +7,12 @@ import time
 import hashlib
 import uuid
 
-
 class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
-                                 octoprint.plugin.SettingsPlugin,
-                                 octoprint.plugin.TemplatePlugin):
+                                          octoprint.plugin.SettingsPlugin,
+                                          octoprint.plugin.TemplatePlugin):
+
+    def __init__(self):
+        self.keep_running = True
 
     def on_after_startup(self):
         self._logger.info("PrusaConnect Uploader started!")
@@ -38,9 +40,12 @@ class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
             self._logger.info("Token not set. Upload loop will not start.")
 
     def get_camera_snapshot_url(self):
-        # Retrieve the camera snapshot URL from OctoPrint settings
         webcam_settings = self._settings.global_get(["webcam", "snapshot"])
-        return webcam_settings
+        if webcam_settings:
+            return webcam_settings
+        else:
+            self._logger.error("No camera snapshot URL configured.")
+            return None
 
     def capture_image(self):
         snapshot_url = self.get_camera_snapshot_url()
@@ -53,11 +58,10 @@ class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
                 self._logger.error(f"Error capturing image: {e}")
                 return None
         else:
-            self._logger.error("No camera snapshot URL configured.")
             return None
 
-    def generate_fingerprint(self):
-        # Using the Raspberry Pi's unique hardware ID
+    @staticmethod
+    def generate_fingerprint():
         device_id = str(uuid.getnode()).encode('utf-8')
         return hashlib.sha256(device_id).hexdigest()
 
@@ -78,11 +82,12 @@ class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
 
         try:
             response = requests.put(prusa_connect_url, headers=headers, data=img_byte_arr)
+            response.raise_for_status()
             if response.status_code in [401, 403]:
                 self._logger.error("Unauthorized or Forbidden response received. Stopping plugin.")
-                return  # Stopping further execution
-            response.raise_for_status()
-            self._logger.info("Image uploaded successfully.")
+                self.keep_running = False
+            else:
+                self._logger.info("Image uploaded successfully.")
         except requests.exceptions.RequestException as e:
             self._logger.error(f"Failed to upload image: {e}")
 
@@ -91,22 +96,16 @@ class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
             dict(type="settings", custom_bindings=False, template="prusa_connect_uploader_settings.jinja2")
         ]
 
-
     def start_upload_loop(self):
         interval = self._settings.get_int(["upload_interval"])
-        self.timer = threading.Timer(interval, self.upload_loop)
-        self.timer.start()
-
-    def upload_loop(self):
-        image = self.capture_image()
-        if image:
-            self.upload_to_prusa_connect(image)
-        if self.timer.is_alive():
-            self.start_upload_loop()
+        while self.keep_running:
+            image = self.capture_image()
+            if image:
+                self.upload_to_prusa_connect(image)
+            time.sleep(interval)
 
     def on_shutdown(self):
-        if self.timer:
-            self.timer.cancel()
+        self.keep_running = False
 
 __plugin_name__ = "Prusa Connect Uploader"
 __plugin_pythoncompat__ = ">=3,<4"
