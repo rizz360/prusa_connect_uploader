@@ -16,6 +16,8 @@ After installation, a new tab will appear in the OctoPrint settings where you ca
 2. Navigate to **Cameras** and click on **+ Add new other camera**.
 3. Copy the provided token and paste it into the plugin's settings token field in OctoPrint.
 
+**Note:** If for some reason the OctoPrint config page for the plugin is blank; disable and then re-enable the plugin using the plugin-manager. The config page should then no longer be blank.
+
 ## Usage
 
 The plugin will begin to automatically upload snapshots at the interval specified in the settings once the token has been provided.
