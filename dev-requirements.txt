@@ -1,0 +1,9 @@
+# File watchers, useful during development
+watchdog
+
+# Optional linters and formatters (recommended)
+black
+flake8
+
+# Optional testing tools
+pytest

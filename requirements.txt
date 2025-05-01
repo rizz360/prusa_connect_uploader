@@ -6,4 +6,7 @@
 # works as expected. Requirements can be found in setup.py.
 ###
 
-.
+# Core dependencies for the plugin
+octoprint
+requests
+Pillow
