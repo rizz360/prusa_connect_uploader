@@ -1,3 +1,20 @@
 include README.md
 include LICENSE.md
+include DEVELOPMENT.md
+
+# Plugin metadata
+include setup.py
+include requirements.txt
+include dev-requirements.txt
+
+# Include templates
 recursive-include octoprint_prusa_connect_uploader/templates *
+
+# Include static assets (e.g. JS for settings UI)
+recursive-include octoprint_prusa_connect_uploader/static *
+
+# Include translations (if ever added)
+recursive-include octoprint_prusa_connect_uploader/translations *
+
+# Ensure Python files are included (sometimes needed with sdist)
+recursive-include octoprint_prusa_connect_uploader *.py
