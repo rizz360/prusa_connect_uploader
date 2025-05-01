@@ -24,12 +24,13 @@ class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
         return {
             "upload_interval": 10,
             "prusa_connect_url": "https://connect.prusa3d.com/c/snapshot",
-            "token": None,  # User must provide this
+            "token": "",  # Initialize token with an empty string
             "fingerprint": None  # Fingerprint will be generated if not existing
         }
 
     def check_settings_and_start_loop(self):
-        if self._settings.get(["token"]):  # Check if token is provided
+        token = self._settings.get(["token"])
+        if token is not None and token != "":  # Check if token is provided and not empty
             if not self._settings.get(["fingerprint"]):
                 self._settings.set(["fingerprint"], self.generate_fingerprint())
                 self._settings.save()
