@@ -1,35 +1,66 @@
 # Prusa Connect Uploader
 
-This OctoPrint plugin allows users to automatically upload snapshots from their 3D printer's camera to Prusa Connect, supporting enhanced monitoring and management of 3D printing processes.
+[![License: MIT](https://img.shields.io/github/license/rizz360/prusa_connect_uploader)](LICENSE.md)
+[![Python](https://img.shields.io/badge/python-3.7–3.11-blue)](https://www.python.org/downloads/)
+[![Latest Release](https://img.shields.io/github/v/release/rizz360/prusa_connect_uploader?label=latest)](https://github.com/rizz360/prusa_connect_uploader/releases)
+[![Last Commit](https://img.shields.io/github/last-commit/rizz360/prusa_connect_uploader)](https://github.com/rizz360/prusa_connect_uploader/commits/main)
 
-## Installation
 
-1. In OctoPrint, navigate to **Settings** > **Plugin Manager** > **Get More**.
-2. Enter the following URL for the plugin archive: [<https://github.com/rizz360/prusa_connect_uploader/archive/refs/tags/1.0.2.zip>](https://github.com/rizz360/prusa_connect_uploader/archive/refs/tags/1.0.2.zip)
-3. Click "Install" to add the plugin to your OctoPrint instance.
+An OctoPrint plugin that automatically uploads snapshots from your 3D printer's camera to [Prusa Connect](https://connect.prusa3d.com), allowing enhanced remote monitoring and management of print jobs.
 
-## Configuration
+---
 
-After installation, a new tab will appear in the OctoPrint settings where you can configure the Prusa Connect Uploader plugin:
+## 📦 Installation
 
-1. Go to the Prusa Connect website at `connect.prusa3d.com`.
-2. Navigate to **Cameras** and click on **+ Add new other camera**.
-3. Copy the provided token and paste it into the plugin's settings token field in OctoPrint.
+1. Open **OctoPrint > Settings > Plugin Manager > Get More > ...from URL**
+2. Enter the following URL:
 
-**Note:** If for some reason the OctoPrint config page for the plugin is blank; disable and then re-enable the plugin using the plugin-manager. The config page should then no longer be blank.
+   ```
+   https://github.com/rizz360/prusa_connect_uploader/archive/refs/heads/main.zip
+   ```
 
-## Usage
+3. Click **Install** and restart OctoPrint when prompted.
 
-The plugin will begin to automatically upload snapshots at the interval specified in the settings once the token has been provided.
+> 🔁 This URL always points to the latest version on the `main` branch.  
+> To install a specific version, use the format:
+> `https://github.com/rizz360/prusa_connect_uploader/archive/refs/tags/<VERSION>.zip`
 
-## Note on Webcam Functionality
+---
 
-The current webcam functionality utilizes parts of the OctoPrint system that have been marked as deprecated and may be removed in future releases. This could cause the webcam-related features of this plugin to break. We will endeavor to update the plugin when OctoPrint releases the new webcam API.
+## ⚙️ Configuration
 
-## Contributing
+1. Go to the [Prusa Connect](https://connect.prusa3d.com) dashboard.
+2. Navigate to **Cameras** → **+ Add new other camera**
+3. Copy the provided token.
+4. In OctoPrint, go to **Settings > Prusa Connect Uploader**
+5. Paste the token and adjust the upload interval if needed.
 
-Contributions are welcome! Please submit any bug reports, feature requests, or pull requests to the repository on GitHub.
+![Screenshot of config panel](docs/config-panel.png)
 
-## Acknowledgments
+---
 
-Thanks to the OctoPrint community and Prusa Research for their support and for providing the APIs used by this plugin.
+## 🖼️ Webcam Notes
+
+This plugin currently uses OctoPrint’s legacy webcam snapshot API, which may change in future OctoPrint versions. If snapshot capture fails, check your **Webcam & Timelapse** settings in OctoPrint.
+
+---
+
+## ❓ Troubleshooting
+
+- If the settings page appears blank:
+  - Restart OctoPrint
+  - Clear your browser cache
+  - Disable and re-enable the plugin from Plugin Manager
+
+---
+
+## 🙌 Acknowledgments
+
+- Built with the [OctoPrint plugin system](https://docs.octoprint.org/en/master/plugins/index.html)
+- Thanks to the OctoPrint and Prusa communities!
+
+---
+
+## 📄 License
+
+MIT – see [`LICENSE.md`](LICENSE.md) for details.
