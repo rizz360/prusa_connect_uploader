@@ -6,6 +6,7 @@ from io import BytesIO
 import hashlib
 import uuid
 
+__plugin_version__ = "1.0.3"
 
 class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
                                  octoprint.plugin.SettingsPlugin,
