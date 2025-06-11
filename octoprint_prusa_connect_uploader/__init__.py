@@ -6,7 +6,7 @@ from io import BytesIO
 import hashlib
 import uuid
 
-__plugin_version__ = "1.0.3"
+__plugin_version__ = "1.0.4"
 
 class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
                                  octoprint.plugin.SettingsPlugin,
@@ -39,9 +39,18 @@ class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
             self._logger.info("Token not set. Upload loop will not start.")
 
     def get_camera_snapshot_url(self):
-        # Retrieve the camera snapshot URL from OctoPrint settings
-        webcam_settings = self._settings.global_get(["webcam", "snapshot"])
-        return webcam_settings
+        """Return the snapshot URL of the default webcam."""
+        try:
+            import octoprint.webcam
+            webcam = octoprint.webcam.get_default_webcam()
+            if webcam:
+                info = webcam.as_dict()
+                return info.get("snapshot")
+        except Exception as e:
+            self._logger.warning(
+                f"Failed to get snapshot URL via get_default_webcam: {e}, falling back to legacy setting"
+            )
+        return self._settings.global_get(["webcam", "snapshot"])
 
     def capture_image(self):
         snapshot_url = self.get_camera_snapshot_url()
@@ -96,6 +105,7 @@ class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
     def start_upload_loop(self):
         interval = self._settings.get_int(["upload_interval"])
         self.timer = threading.Timer(interval, self.upload_loop)
+        self.timer.daemon = True
         self.timer.start()
 
     def upload_loop(self):
@@ -108,6 +118,20 @@ class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
     def on_shutdown(self):
         if self.timer:
             self.timer.cancel()
+
+    ##~~ Softwareupdate hook
+    def get_update_information(self):
+        return {
+            "prusa_connect_uploader": {
+                "displayName": "Prusa Connect Uploader",
+                "displayVersion": self._plugin_version,
+                "type": "github_release",
+                "user": "rizz360",
+                "repo": "prusa_connect_uploader",
+                "current": self._plugin_version,
+                "pip": "https://github.com/rizz360/prusa_connect_uploader/archive/{target_version}.zip",
+            }
+        }
 
 __plugin_name__ = "Prusa Connect Uploader"
 __plugin_pythoncompat__ = ">=3,<4"
