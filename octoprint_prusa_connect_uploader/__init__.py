@@ -8,9 +8,16 @@ import uuid
 
 __plugin_version__ = "1.0.3"
 
-class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
-                                 octoprint.plugin.SettingsPlugin,
-                                 octoprint.plugin.TemplatePlugin):
+class OctoprintPrusaConnectUploaderPlugin(
+    octoprint.plugin.StartupPlugin,
+    octoprint.plugin.SettingsPlugin,
+    octoprint.plugin.TemplatePlugin,
+):
+
+    def __init__(self):
+        # Timer handle for the periodic uploads. Initialized to None and
+        # replaced with a ``threading.Timer`` instance when the loop is active.
+        self.timer = None
 
     def on_after_startup(self):
         self._logger.info("PrusaConnect Uploader started!")
@@ -36,6 +43,10 @@ class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
                 self._settings.save()
             self.start_upload_loop()
         else:
+            # No token -> stop any running timer so uploads cease until configured again
+            if self.timer and self.timer.is_alive():
+                self.timer.cancel()
+                self.timer = None
             self._logger.info("Token not set. Upload loop will not start.")
 
     def get_camera_snapshot_url(self):
@@ -95,6 +106,9 @@ class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
 
     def start_upload_loop(self):
         interval = self._settings.get_int(["upload_interval"])
+        # Restart the timer if it's already running to avoid multiple concurrent loops
+        if self.timer and self.timer.is_alive():
+            self.timer.cancel()
         self.timer = threading.Timer(interval, self.upload_loop)
         self.timer.start()
 
@@ -102,12 +116,14 @@ class OctoprintPrusaConnectUploaderPlugin(octoprint.plugin.StartupPlugin,
         image = self.capture_image()
         if image:
             self.upload_to_prusa_connect(image)
-        if self.timer.is_alive():
+        # Only continue scheduling if the timer hasn't been cancelled mid-run
+        if self.timer and self.timer.is_alive():
             self.start_upload_loop()
 
     def on_shutdown(self):
         if self.timer:
             self.timer.cancel()
+            self.timer = None
 
 __plugin_name__ = "Prusa Connect Uploader"
 __plugin_pythoncompat__ = ">=3,<4"
