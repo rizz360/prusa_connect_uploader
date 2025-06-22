@@ -59,13 +59,24 @@ class OctoprintPrusaConnectUploaderPlugin(
         return hashlib.sha256(device_id).hexdigest()
 
     def capture_image(self):
+        """
+        Capture a snapshot image using OctoPrint's new WebcamProvider API.
+        """
         try:
-            webcam = get_default_webcam(self._plugin_manager, self._settings)
+            # Obtain default webcam provider
+            webcam = get_default_webcam(
+                settings=self._settings, plugin_manager=self._plugin_manager
+            )
             if not webcam:
                 raise RuntimeError("No default webcam available")
-            snapshot_url = getattr(webcam, "snapshot_url", None)
+            # The compatibility layer provides the actual snapshot URL
+            compat = getattr(webcam.config, "compat", None)
+            snapshot_url = getattr(compat, "snapshot", None) if compat else None
             if not snapshot_url:
-                raise RuntimeError("Default webcam has no snapshot URL")
+                # Fallback to any display snapshot URL if set
+                snapshot_url = getattr(webcam.config, "snapshotDisplay", None)
+            if not snapshot_url:
+                raise RuntimeError("Default webcam has no snapshot URL configured")
             response = requests.get(snapshot_url)
             response.raise_for_status()
             return Image.open(BytesIO(response.content))
