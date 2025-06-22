@@ -2,7 +2,7 @@
   "name": "Prusa Connect Uploader",
   "identifier": "prusa_connect_uploader",
   "package": "octoprint_prusa_connect_uploader",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Uploads webcam snapshots to Prusa Connect for remote monitoring.",
   "author": "Rizz",
   "homepage": "https://github.com/rizz360/prusa_connect_uploader",
