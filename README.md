@@ -1,5 +1,6 @@
 # Prusa Connect Uploader
 
+[![Plugin in OctoPrint Plugin Repository](https://img.shields.io/badge/OctoPrint%20Plugin-Available-blue.svg)](https://plugins.octoprint.org/plugins/prusa_connect_uploader/)
 [![License: MIT](https://img.shields.io/github/license/rizz360/prusa_connect_uploader)](LICENSE.md)
 [![Python](https://img.shields.io/badge/python-3.7–3.11-blue)](https://www.python.org/downloads/)
 [![Latest Release](https://img.shields.io/github/v/release/rizz360/prusa_connect_uploader?label=latest)](https://github.com/rizz360/prusa_connect_uploader/releases)
@@ -12,18 +13,27 @@ An OctoPrint plugin that automatically uploads snapshots from your 3D printer's 
 
 ## 📦 Installation
 
-1. Open **OctoPrint > Settings > Plugin Manager > Get More > ...from URL**
-2. Enter the following URL:
+### 🧩 Option 1: Install from Plugin Manager (Recommended)
 
-   ```
-   https://github.com/rizz360/prusa_connect_uploader/archive/refs/heads/main.zip
-   ```
+Once this plugin is approved, it will be available directly from OctoPrint:
 
-3. Click **Install** and restart OctoPrint when prompted.
+1. Go to **Settings > Plugin Manager > Get More**
+2. Search for **Prusa Connect Uploader**
+3. Click **Install** and restart OctoPrint when prompted
+
+### 🛠️ Option 2: Manual Installation
+
+You can also install the latest version manually:
+
+1. Open **Settings > Plugin Manager > Get More > ...from URL**
+2. Enter:
+> https://github.com/rizz360/prusa_connect_uploader/archive/refs/heads/main.zip
+
 
 > 🔁 This URL always points to the latest version on the `main` branch.  
 > To install a specific version, use the format:
 > `https://github.com/rizz360/prusa_connect_uploader/archive/refs/tags/<VERSION>.zip`
+
 
 ---
 
