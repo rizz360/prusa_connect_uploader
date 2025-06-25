@@ -110,7 +110,7 @@ class OctoprintPrusaConnectUploaderPlugin(
                 self.stop_upload_loop()
                 return
             response.raise_for_status()
-            self._logger.info("Image uploaded successfully.")
+            self._logger.debug("Image uploaded successfully.")
         except requests.exceptions.RequestException as e:
             self._logger.error(f"Failed to upload image: {e}")
 
