@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "package-name": "prusa_connect_uploader",
+      "include-component-in-tag": false,
+      "extra-files": [
+        "octoprint_prusa_connect_uploader/__init__.py",
+        "setup.py",
+        {
+          "type": "json",
+          "path": ".pluginrepo.json",
+          "jsonpath": "$.version"
+        }
+      ]
+    }
+  }
+}

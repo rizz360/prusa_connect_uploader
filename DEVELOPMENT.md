@@ -92,6 +92,23 @@ octoprint_prusa_connect_uploader/
 
 ---
 
+## 🚀 Releasing
+
+Releases are fully automated with [release-please](https://github.com/googleapis/release-please):
+
+1. Use [Conventional Commits](https://www.conventionalcommits.org/) on `main`
+   (`fix:` → patch bump, `feat:` → minor bump, `feat!:`/`BREAKING CHANGE` → major bump).
+2. release-please keeps a release PR open that collects changes and bumps the
+   version in `setup.py`, `octoprint_prusa_connect_uploader/__init__.py` and
+   `.pluginrepo.json` (via the `x-release-please-version` annotations — don't
+   remove them) plus `CHANGELOG.md`.
+3. Merge the release PR. The workflow then tags `vX.Y.Z`, creates the GitHub
+   release and attaches `prusa_connect_uploader-X.Y.Z.zip` built from the tag.
+
+No manual steps required — do not edit version numbers by hand.
+
+---
+
 ## 👥 Contributing
 
 - Test core functionality before submitting PRs
