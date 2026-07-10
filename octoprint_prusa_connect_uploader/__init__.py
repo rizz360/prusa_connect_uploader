@@ -41,8 +41,9 @@ class OctoprintPrusaConnectUploaderPlugin(
         super().on_settings_save(data)
         self.check_settings_and_start_loop()
 
-    def is_api_protected(self):
-        return True
+    def get_settings_restricted_paths(self):
+        # only expose the Prusa Connect token to admins
+        return {"admin": [["token"]]}
 
     def check_settings_and_start_loop(self):
         token = self._settings.get(["token"])
