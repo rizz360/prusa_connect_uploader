@@ -19,6 +19,7 @@ class OctoprintPrusaConnectUploaderPlugin(
 ):
     def __init__(self):
         self.timer = None
+        self.auth_failures = 0
 
     def initialize(self):
         # nothing to initialize beyond defaults
@@ -117,12 +118,22 @@ class OctoprintPrusaConnectUploaderPlugin(
                 timeout=30,
             )
             if response.status_code in (401, 403):
+                self.auth_failures += 1
                 self._logger.error(
-                    "Unauthorized or Forbidden response received. Stopping plugin."
+                    f"Prusa Connect rejected the upload (HTTP {response.status_code}). "
+                    "This usually means the token is invalid or already bound to a "
+                    "different camera fingerprint. Create a new 'other camera' in "
+                    "Prusa Connect and paste the fresh token into the plugin settings."
                 )
-                self.stop_upload_loop()
+                if self.auth_failures >= 3:
+                    self._logger.error(
+                        "Three consecutive authorization failures - stopping uploads. "
+                        "Saving the plugin settings or restarting OctoPrint will retry."
+                    )
+                    self.stop_upload_loop()
                 return
             response.raise_for_status()
+            self.auth_failures = 0
             self._logger.debug("Image uploaded successfully.")
         except requests.exceptions.RequestException as e:
             self._logger.error(f"Failed to upload image: {e}")
@@ -136,6 +147,7 @@ class OctoprintPrusaConnectUploaderPlugin(
             interval = 10
         if self.timer:
             self.stop_upload_loop()
+        self.auth_failures = 0
         # RepeatedTimer uses a daemon thread by default
         self.timer = RepeatedTimer(interval, self.upload_loop)
         self.timer.start()
