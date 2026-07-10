@@ -1,7 +1,7 @@
 # Prusa Connect Uploader
 
 [![License: MIT](https://img.shields.io/github/license/rizz360/prusa_connect_uploader)](LICENSE.md)
-[![Python](https://img.shields.io/badge/python-3.7–3.11-blue)](https://www.python.org/downloads/)
+[![Python](https://img.shields.io/badge/python-3.7%2B-blue)](https://www.python.org/downloads/)
 [![Latest Release](https://img.shields.io/github/v/release/rizz360/prusa_connect_uploader?label=latest)](https://github.com/rizz360/prusa_connect_uploader/releases)
 [![Last Commit](https://img.shields.io/github/last-commit/rizz360/prusa_connect_uploader)](https://github.com/rizz360/prusa_connect_uploader/commits/main)
 
@@ -40,7 +40,7 @@ You can install the latest version manually:
 
 ## 🖼️ Webcam Notes
 
-This plugin currently uses OctoPrint’s legacy webcam snapshot API, which may change in future OctoPrint versions. If snapshot capture fails, check your **Webcam & Timelapse** settings in OctoPrint.
+This plugin uses OctoPrint’s webcam provider API (OctoPrint 1.9+) and respects your snapshot URL, authentication and SSL settings. If snapshot capture fails, check your **Webcam & Timelapse** settings in OctoPrint and verify the snapshot URL works there.
 
 ---
 
