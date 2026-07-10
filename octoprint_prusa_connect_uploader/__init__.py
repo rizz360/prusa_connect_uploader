@@ -4,7 +4,7 @@ from PIL import Image
 from io import BytesIO
 import hashlib
 import uuid
-from octoprint.webcams import get_default_webcam
+from octoprint.webcams import get_default_webcam, get_snapshot_webcam
 from octoprint.util import RepeatedTimer
 
 __plugin_name__ = "Prusa Connect Uploader"
@@ -60,24 +60,33 @@ class OctoprintPrusaConnectUploaderPlugin(
 
     def capture_image(self):
         """
-        Capture a snapshot image using OctoPrint's new WebcamProvider API.
+        Capture a snapshot image using OctoPrint's WebcamProvider API.
         """
         try:
-            # Obtain default webcam provider
-            webcam = get_default_webcam(
+            webcam = get_snapshot_webcam(
+                settings=self._settings, plugin_manager=self._plugin_manager
+            ) or get_default_webcam(
                 settings=self._settings, plugin_manager=self._plugin_manager
             )
             if not webcam:
-                raise RuntimeError("No default webcam available")
-            # The compatibility layer provides the actual snapshot URL
+                raise RuntimeError("No webcam available")
+            if getattr(webcam.config, "canSnapshot", False):
+                # The provider honors OctoPrint's snapshot auth, SSL
+                # validation and timeout settings
+                snapshot = webcam.providerPlugin.take_webcam_snapshot(
+                    webcam.config.name
+                )
+                return Image.open(BytesIO(b"".join(snapshot)))
+            # Fallback for providers without snapshot support: fetch the
+            # compat layer's snapshot URL directly
             compat = getattr(webcam.config, "compat", None)
             snapshot_url = getattr(compat, "snapshot", None) if compat else None
             if not snapshot_url:
-                # Fallback to any display snapshot URL if set
-                snapshot_url = getattr(webcam.config, "snapshotDisplay", None)
-            if not snapshot_url:
-                raise RuntimeError("Default webcam has no snapshot URL configured")
-            response = requests.get(snapshot_url)
+                raise RuntimeError(
+                    "Webcam cannot take snapshots and has no snapshot URL "
+                    "configured. Check OctoPrint's Webcam & Timelapse settings."
+                )
+            response = requests.get(snapshot_url, timeout=30)
             response.raise_for_status()
             return Image.open(BytesIO(response.content))
         except Exception as e:
@@ -95,6 +104,9 @@ class OctoprintPrusaConnectUploaderPlugin(
             "Content-Type": "image/jpeg",
         }
 
+        if image.mode != "RGB":
+            # JPEG cannot store alpha channels (e.g. RGBA PNG snapshots)
+            image = image.convert("RGB")
         img_byte_arr = BytesIO()
         image.save(img_byte_arr, format="JPEG")
         try:
@@ -102,6 +114,7 @@ class OctoprintPrusaConnectUploaderPlugin(
                 prusa_connect_url,
                 headers=headers,
                 data=img_byte_arr.getvalue(),
+                timeout=30,
             )
             if response.status_code in (401, 403):
                 self._logger.error(
@@ -116,6 +129,11 @@ class OctoprintPrusaConnectUploaderPlugin(
 
     def start_upload_loop(self):
         interval = self._settings.get_int(["upload_interval"])
+        if not interval or interval < 1:
+            self._logger.warning(
+                f"Invalid upload interval {interval!r}, falling back to 10 seconds."
+            )
+            interval = 10
         if self.timer:
             self.stop_upload_loop()
         # RepeatedTimer uses a daemon thread by default
@@ -131,9 +149,14 @@ class OctoprintPrusaConnectUploaderPlugin(
             self.timer = None
 
     def upload_loop(self):
-        image = self.capture_image()
-        if image:
-            self.upload_to_prusa_connect(image)
+        # RepeatedTimer's thread dies permanently on an uncaught exception,
+        # so nothing may escape this method
+        try:
+            image = self.capture_image()
+            if image:
+                self.upload_to_prusa_connect(image)
+        except Exception:
+            self._logger.exception("Unexpected error in upload loop")
 
     def on_shutdown(self):
         self.stop_upload_loop()
