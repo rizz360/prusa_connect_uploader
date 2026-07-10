@@ -127,3 +127,6 @@ dmypy.json
 octoprint_venv/
 data/
 logs/
+
+# release zips are built by CI and attached to GitHub releases
+prusa_connect_uploader-*.zip
