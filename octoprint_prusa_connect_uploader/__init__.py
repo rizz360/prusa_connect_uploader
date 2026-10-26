@@ -22,6 +22,7 @@ class OctoprintPrusaConnectUploaderPlugin(
         self.timer = None
         self.auth_failures = 0
         self._applied_camera = None
+        self._camera_name_lock = threading.Lock()
 
     def initialize(self):
         # nothing to initialize beyond defaults
@@ -47,25 +48,27 @@ class OctoprintPrusaConnectUploaderPlugin(
 
     def update_camera_name(self):
         """Rename the camera in Prusa Connect using our own fingerprint."""
-        name = (self._settings.get(["camera_name"]) or "").strip()
-        token = self._settings.get(["token"])
-        fingerprint = self._settings.get(["fingerprint"])
-        if not name or not token or not fingerprint:
-            return
-        if (token, fingerprint, name) == self._applied_camera:
-            return
-        try:
-            response = requests.put(
-                self._settings.get(["camera_info_url"]),
-                headers={"Token": token, "Fingerprint": fingerprint},
-                json={"config": {"name": name}},
-                timeout=30,
-            )
-            response.raise_for_status()
-            self._applied_camera = (token, fingerprint, name)
-            self._logger.info(f"Camera name set to {name!r} in Prusa Connect.")
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"Failed to set camera name: {e}")
+        # Serialize renames so concurrent saves can't apply a stale name
+        with self._camera_name_lock:
+            name = (self._settings.get(["camera_name"]) or "").strip()
+            token = self._settings.get(["token"])
+            fingerprint = self._settings.get(["fingerprint"])
+            if not name or not token or not fingerprint:
+                return
+            if (token, fingerprint, name) == self._applied_camera:
+                return
+            try:
+                response = requests.put(
+                    self._settings.get(["camera_info_url"]),
+                    headers={"Token": token, "Fingerprint": fingerprint},
+                    json={"config": {"name": name}},
+                    timeout=30,
+                )
+                response.raise_for_status()
+                self._applied_camera = (token, fingerprint, name)
+                self._logger.info(f"Camera name set to {name!r} in Prusa Connect.")
+            except requests.exceptions.RequestException as e:
+                self._logger.error(f"Failed to set camera name: {e}")
 
     def get_settings_restricted_paths(self):
         # only expose the Prusa Connect token to admins
