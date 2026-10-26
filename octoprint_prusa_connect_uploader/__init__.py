@@ -54,6 +54,7 @@ class OctoprintPrusaConnectUploaderPlugin(
             token = self._settings.get(["token"])
             fingerprint = self._settings.get(["fingerprint"])
             if not name or not token or not fingerprint:
+                self._applied_camera = None
                 return
             if (token, fingerprint, name) == self._applied_camera:
                 return
