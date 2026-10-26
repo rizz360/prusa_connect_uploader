@@ -56,17 +56,18 @@ class OctoprintPrusaConnectUploaderPlugin(
             if not name or not token or not fingerprint:
                 self._applied_camera = None
                 return
-            if (token, fingerprint, name) == self._applied_camera:
+            camera_info_url = self._settings.get(["camera_info_url"])
+            if (camera_info_url, token, fingerprint, name) == self._applied_camera:
                 return
             try:
                 response = requests.put(
-                    self._settings.get(["camera_info_url"]),
+                    camera_info_url,
                     headers={"Token": token, "Fingerprint": fingerprint},
                     json={"config": {"name": name}},
                     timeout=30,
                 )
                 response.raise_for_status()
-                self._applied_camera = (token, fingerprint, name)
+                self._applied_camera = (camera_info_url, token, fingerprint, name)
                 self._logger.info(f"Camera name set to {name!r} in Prusa Connect.")
             except requests.exceptions.RequestException as e:
                 self._applied_camera = None
