@@ -69,6 +69,7 @@ class OctoprintPrusaConnectUploaderPlugin(
                 self._applied_camera = (token, fingerprint, name)
                 self._logger.info(f"Camera name set to {name!r} in Prusa Connect.")
             except requests.exceptions.RequestException as e:
+                self._applied_camera = None
                 self._logger.error(f"Failed to set camera name: {e}")
 
     def get_settings_restricted_paths(self):
