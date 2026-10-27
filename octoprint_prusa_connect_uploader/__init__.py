@@ -3,6 +3,7 @@ import requests
 from PIL import Image
 from io import BytesIO
 import hashlib
+import threading
 import uuid
 from octoprint.webcams import get_default_webcam, get_snapshot_webcam
 from octoprint.util import RepeatedTimer
@@ -20,6 +21,8 @@ class OctoprintPrusaConnectUploaderPlugin(
     def __init__(self):
         self.timer = None
         self.auth_failures = 0
+        self._applied_camera = None
+        self._camera_name_lock = threading.Lock()
 
     def initialize(self):
         # nothing to initialize beyond defaults
@@ -35,11 +38,40 @@ class OctoprintPrusaConnectUploaderPlugin(
             "prusa_connect_url": "https://connect.prusa3d.com/c/snapshot",
             "token": "",
             "fingerprint": None,
+            "camera_name": "",
+            "camera_info_url": "https://camera-service.prusa3d.com/v0/camera-info",
         }
 
     def on_settings_save(self, data):
         super().on_settings_save(data)
         self.check_settings_and_start_loop()
+
+    def update_camera_name(self):
+        """Rename the camera in Prusa Connect using our own fingerprint."""
+        # Serialize renames so concurrent saves can't apply a stale name
+        with self._camera_name_lock:
+            name = (self._settings.get(["camera_name"]) or "").strip()
+            token = self._settings.get(["token"])
+            fingerprint = self._settings.get(["fingerprint"])
+            if not name or not token or not fingerprint:
+                self._applied_camera = None
+                return
+            camera_info_url = self._settings.get(["camera_info_url"])
+            if (camera_info_url, token, fingerprint, name) == self._applied_camera:
+                return
+            try:
+                response = requests.put(
+                    camera_info_url,
+                    headers={"Token": token, "Fingerprint": fingerprint},
+                    json={"config": {"name": name}},
+                    timeout=30,
+                )
+                response.raise_for_status()
+                self._applied_camera = (camera_info_url, token, fingerprint, name)
+                self._logger.info(f"Camera name set to {name!r} in Prusa Connect.")
+            except requests.exceptions.RequestException as e:
+                self._applied_camera = None
+                self._logger.error(f"Failed to set camera name: {e}")
 
     def get_settings_restricted_paths(self):
         # only expose the Prusa Connect token to admins
@@ -52,6 +84,7 @@ class OctoprintPrusaConnectUploaderPlugin(
                 self._settings.set(["fingerprint"], self.generate_fingerprint())
                 self._settings.save()
             self.start_upload_loop()
+            threading.Thread(target=self.update_camera_name, daemon=True).start()
         else:
             self._logger.info("Token not set. Upload loop will not start.")
             self.stop_upload_loop()
