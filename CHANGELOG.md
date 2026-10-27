@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0](https://github.com/rizz360/prusa_connect_uploader/compare/v1.1.0...v1.2.0) (2026-10-27)
+
+
+### Features
+
+* add camera name setting ([#12](https://github.com/rizz360/prusa_connect_uploader/issues/12)) ([6ffa708](https://github.com/rizz360/prusa_connect_uploader/commit/6ffa7086405d9e6a0552998fb7c2f4d95f5b146c))
+* serialize camera name updates to prevent concurrent access issues ([c1873e8](https://github.com/rizz360/prusa_connect_uploader/commit/c1873e874d6f722cdfb77b1d5cf207382a8c5f4c))
+
 ## [1.1.0](https://github.com/rizz360/prusa_connect_uploader/compare/v1.0.6...v1.1.0) (2026-07-10)
 
 
