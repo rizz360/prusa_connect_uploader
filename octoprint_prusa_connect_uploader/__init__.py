@@ -9,7 +9,7 @@ from octoprint.webcams import get_default_webcam, get_snapshot_webcam
 from octoprint.util import RepeatedTimer
 
 __plugin_name__ = "Prusa Connect Uploader"
-__plugin_version__ = "1.1.0"  # x-release-please-version
+__plugin_version__ = "1.2.0"  # x-release-please-version
 __plugin_pythoncompat__ = ">=3,<4"
 
 
